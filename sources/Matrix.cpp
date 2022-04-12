@@ -1,4 +1,5 @@
 // @AUTHOR: dvir borochov
+
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -17,6 +18,22 @@ Matrix::Matrix(vector<double> vec, int row, int column)
     : _vec(std::move(vec)), _row(row), _column(column)
 
 {
+    if (this->_vec.empty())
+    {
+        throw invalid_argument("empty vactor");
+    }
+    if (this->_row <= 0 || this->_column <= 0)
+    {
+        throw invalid_argument("size of row/ colunm is negetive");
+    }
+    if (this->_row * this->_column != this->_row * this->_column)
+    {
+        //  cout << this->_row * this->_column << endl << this->_row * this->_column << endl;
+        throw invalid_argument("unvalid sizes");
+    }
+    if(this->_vec.size() != (unsigned int)(this->_row) * (unsigned int)(this->_column)){
+                throw invalid_argument("unvalid sizes");
+    }
 }
 
 //-----------------------------
@@ -51,20 +68,6 @@ Matrix Matrix::operator-(const Matrix &other)
 
     return temp;
 }
-// here we change the orginal mat
-// Matrix Matrix::operator-=(const Matrix &other)
-// {
-//     if (this->_row != other._row || this->_column != other._column)
-//     {
-//         throw "can't make Arithmetic Operators between Different matrices";
-//     }
-//     for (unsigned i = 0; i < this->_vec.size(); i++)
-//     {
-//         this->_vec.at(i) = this->_vec.at(i) - other._vec.at(i);
-//     }
-
-//     return *this;
-// }
 
 Matrix Matrix::operator+() const
 {
@@ -102,62 +105,51 @@ Matrix Matrix::operator-=(const Matrix &other)
     return (*this = *this - other);
 }
 
-// ---------------------------------------------------------------
+// ----------------------
 // inc and dec operators
-// ---------------------------------------------------------------
-Matrix Matrix::operator++() const // pre (++x)
+// ----------------------
+
+Matrix &Matrix::operator++() // pre (++x)
 {
-    Matrix temp{this->_vec, this->_row, this->_column};
-    for (unsigned i = 0; i < temp._vec.size(); i++)
+    for (unsigned i = 0; i < this->_vec.size(); i++)
     {
-        temp._vec.at(i) -= 1;
+        this->_vec.at(i) += 1;
     }
 
-    return temp;
+    return *this;
 }
 
-Matrix Matrix::operator--() const // pre (--x)
+Matrix &Matrix::operator--() // pre (--x)
 {
-    Matrix temp{this->_vec, this->_row, this->_column};
-    for (unsigned i = 0; i < temp._vec.size(); i++)
+    for (unsigned i = 0; i < this->_vec.size(); i++)
     {
-        temp._vec.at(i) -= 1;
+        this->_vec.at(i) -= 1;
     }
-
-    return temp;
+    return *this;
 }
 
-Matrix Matrix::operator--(int num) const // post (x--)
+Matrix Matrix::operator--(int num) // post (x--)
 {
-    Matrix temp{this->_vec, this->_row, this->_column};
-    for (unsigned i = 0; i < temp._vec.size(); i++)
-    {
-        temp._vec.at(i) -= 1;
-    }
 
-    return temp;
+    Matrix res = *this;
+    --(*this);
+    return res;
 }
 
-Matrix Matrix::operator++(int num) const // post (x++)
+Matrix Matrix::operator++(int num) // post (x++)
 {
-    Matrix temp{this->_vec, this->_row, this->_column};
-    for (unsigned i = 0; i < temp._vec.size(); i++)
-    {
-        temp._vec.at(i) += 1;
-    }
-
-    return temp;
+    Matrix res = *this;
+    ++(*this);
+    return res;
 }
-//-----------------------------
-// Comparison Operators:
-//-----------------------------
+
+//---------------------
+// Comparison Operators
+//---------------------
 
 bool Matrix::operator!=(const Matrix &other) const
 {
-    // int sum1 = std::accumulate(this->_vec.begin(), this->_vec.end(), 0);
-    // int sum2 = std::accumulate(other._vec.begin(), other._vec.end(), 0);
 
-    // return (sum1 != sum2 ? true : false);
     return !(*this == other);
 }
 
@@ -165,12 +157,12 @@ bool Matrix::operator==(const Matrix &other) const
 {
     if (this->_row != other._row || this->_column != other._column)
     {
-        return false;
+        throw invalid_argument("are not the same.. ");
     }
 
-    for (size_t i = 0; i < this->_row; ++i)
+    for (unsigned int i = 0; i < this->_row; ++i)
     {
-        for (size_t j = 0; j < this->_column; j++)
+        for (unsigned int j = 0; j < this->_column; j++)
         {
             if (this->_vec.at(i) != other._vec.at(i))
             {
@@ -184,6 +176,10 @@ bool Matrix::operator==(const Matrix &other) const
 
 bool Matrix::operator<=(const Matrix &other) const
 {
+    if (this->_row != other._row || this->_column != other._column)
+    {
+        throw "can't compare betwen them";
+    }
     bool flag = false;
     size_t sum1 = std::accumulate(this->_vec.begin(), this->_vec.end(), 0.0);
     size_t sum2 = std::accumulate(other._vec.begin(), other._vec.end(), 0.0);
@@ -195,6 +191,10 @@ bool Matrix::operator<=(const Matrix &other) const
 }
 bool Matrix::operator>=(const Matrix &other) const
 {
+    if (this->_row != other._row || this->_column != other._column)
+    {
+        throw "can't compare betwen them";
+    }
     bool flag = false;
     size_t sum1 = std::accumulate(this->_vec.begin(), this->_vec.end(), 0.0);
     size_t sum2 = std::accumulate(other._vec.begin(), other._vec.end(), 0.0);
@@ -207,6 +207,10 @@ bool Matrix::operator>=(const Matrix &other) const
 
 bool Matrix::operator<(const Matrix &other) const
 {
+    if (this->_row != other._row || this->_column != other._column)
+    {
+        throw "can't compare betwen them";
+    }
     bool flag = false;
     size_t sum1 = std::accumulate(this->_vec.begin(), this->_vec.end(), 0.0);
     size_t sum2 = std::accumulate(other._vec.begin(), other._vec.end(), 0.0);
@@ -218,6 +222,10 @@ bool Matrix::operator<(const Matrix &other) const
 }
 bool Matrix::operator>(const Matrix &other) const
 {
+    if (this->_row != other._row || this->_column != other._column)
+    {
+        throw "can't compare betwen them";
+    }
     bool flag = false;
     size_t sum1 = std::accumulate(this->_vec.begin(), this->_vec.end(), 0.0);
     size_t sum2 = std::accumulate(other._vec.begin(), other._vec.end(), 0.0);
@@ -228,9 +236,9 @@ bool Matrix::operator>(const Matrix &other) const
     return flag;
 }
 
-//-----------------------------
-// mult Operators:
-//-----------------------------
+//---------------
+// mult Operators
+//---------------
 
 // mult mat with some num.. not change the orginal mat
 zich::Matrix zich::operator*(double d, Matrix &mat)
@@ -245,30 +253,39 @@ zich::Matrix zich::operator*(double d, Matrix &mat)
     }
     return temp;
 }
+/*
+
+*/
+double Matrix::mult_helper(const Matrix &other, const int row, const int col)
+{
+    double ans = 0;
+    for (int i = 0; i < this->_column; i++)
+    {
+        unsigned int left_mat = (unsigned int)(this->_column * row + i);
+        unsigned int right_mat = (unsigned int)(other._column * i + col);
+        ans += this->_vec.at(left_mat) * other._vec.at(right_mat);
+    }
+    return ans;
+}
 
 // mult 2 mat..return the new mat the mult of them
-Matrix Matrix::operator*(Matrix &other)
+Matrix Matrix::operator*(const Matrix &other)
 {
     if (this->_column != other._row)
     {
-        throw "wrong mult";
+        throw "column num of left matrix not eqals to right rows num";
     }
-    unsigned int size = (unsigned int)(this->_row * other._column);
-    vector<double> tVec(size, 0);
 
-    Matrix temp{tVec, this->_column, other._row};
-
-    for (unsigned int i = 0; i < this->_row; ++i)
+    std::vector<double> tVec;
+    tVec.resize((unsigned int)(this->_row * other._column));
+    Matrix temp(tVec, this->_row, other._column);
+    for (int i = 0; i < temp._row; i++)
     {
-        for (unsigned int j = 0; j < other._column; ++j)
+        for (int j = 0; j < temp._column; j++)
         {
-            for (unsigned int k = 0; k < this->_column; ++k)
-            {
-                temp._vec.at(i + j) += this->_vec.at(i + k) * other._vec.at(k + j);
-            }
+            temp._vec.at((unsigned int)(i * temp._column + j)) = mult_helper(other, i, j);
         }
     }
-
     return temp;
 }
 
@@ -298,30 +315,44 @@ Matrix Matrix::operator*(double d) const
     return temp;
 }
 
-//-----------------------------
+Matrix &Matrix::operator*=(const Matrix &other)
+{
+    *this = (*this * other);
+    return *this;
+}
+
+//--------------
 // I/O Operators
-//-----------------------------
+//--------------
+
 ostream &zich::operator<<(std::ostream &out, Matrix mat)
 {
-    // for iner using:
     unsigned int ii = 0;
-    unsigned int jj = 0;
-
-    for (unsigned int i = 0; i < mat._row; ++i)
+    for (unsigned int i = 0; i < mat._row; i++)
     {
-        for (unsigned int j = 0; j < mat._column; ++j)
+        out << "[";
+        for (unsigned int j = 0; j < mat._column; j++)
         {
-            cout << " " << mat._vec.at(ii + jj);
-            jj++;
-            if (j == mat._column - 1)
+            if (j < mat._column - 1)
             {
-                cout << endl;
+                ii = (unsigned int)(mat._column);
+                out << mat._vec.at(i * ii + j) << " ";
             }
-            jj = 0;
-            ii++;
+            else
+            {
+                ii = (unsigned int)(mat._column);
+                out << mat._vec.at(i * ii + j);
+            }
+        }
+        if (i < mat._row - 1)
+        {
+            out << "]" << endl;
+        }
+        else
+        {
+            out << "]";
         }
     }
-
     return out;
 }
 
@@ -341,7 +372,7 @@ istream &zich::operator>>(std::istream &in, Matrix &mat)
     while ((pos = s.find(delimiter)) != string::npos)
     {
         token = s.substr(0, pos);
-        if (rowLen == SIZE_MAX)
+        if (rowLen == SIZE_MAX) // init the line at the first time..
         {
             rowLen = token.length();
         }
@@ -356,6 +387,17 @@ istream &zich::operator>>(std::istream &in, Matrix &mat)
         std::cout << token << endl;
         s.erase(0, pos + delimiter.length());
     }
+    //** final iterate:
+    token = s.substr(0, pos);
+    if (token.length() != rowLen)
+    {
+        throw invalid_argument("the rows must be the same length\n");
+    }
+    ans += token;
+    std::cout << token << endl;
+
+    //** endl
+
     if (s.length() != rowLen) // check if the final part is valid
     {
         throw invalid_argument("the rows must be the same length\n");
